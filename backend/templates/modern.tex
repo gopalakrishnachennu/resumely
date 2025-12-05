@@ -1,0 +1,139 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[left=0.75in,top=0.6in,right=0.75in,bottom=0.6in]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+% Font setup
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Modern color scheme
+\definecolor{primary}{RGB}{41, 128, 185}
+\definecolor{accent}{RGB}{52, 73, 94}
+
+% Section formatting with color
+\titleformat{\section}{\large\bfseries\color{primary}\uppercase}{}{0em}{}[\color{primary}\titlerule]
+\titlespacing{\section}{0pt}{10pt}{5pt}
+
+% Remove paragraph indentation
+\setlength{\parindent}{0pt}
+
+% Hyperlink setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    urlcolor=primary
+}
+
+% Custom commands
+{% raw %}
+\newcommand{\resumeSubheading}[4]{
+  \textbf{\color{accent}#1} \hfill \textit{#2} \\
+  \textit{#3} \hfill #4
+}
+{% endraw %}
+
+\begin{document}
+
+% Header with modern styling
+\begin{center}
+    {\Huge\bfseries\color{primary} {{- personal_info.name -}} } \\
+    \vspace{5pt}
+    {\large
+    {% if personal_info.location %}{{ personal_info.location }} $\bullet$ {% endif %}
+    {% if personal_info.phone %}{{ personal_info.phone }} $\bullet$ {% endif %}
+    {{ personal_info.email }}
+    }\\
+    \vspace{2pt}
+    {% if personal_info.linkedin %}
+    \href{ {{- personal_info.linkedin -}} }{\textbf{LinkedIn}}
+    {% endif %}
+    {% if personal_info.github %}
+    {% if personal_info.linkedin %}$\bullet${% endif %}
+    \href{ {{- personal_info.github -}} }{\textbf{GitHub}}
+    {% endif %}
+\end{center}
+
+\vspace{-5pt}
+
+% Professional Summary
+{% if summary %}
+\section{Professional Summary}
+{{ summary }}
+{% endif %}
+
+% Technical Skills
+\section{Technical Skills}
+{% if skills is mapping %}
+\begin{itemize}[leftmargin=0.15in, itemsep=2pt]
+{% for category, items in skills.items() %}
+    \item \textbf{ {{- category -}} :} {{ items|join(', ') }}
+{% endfor %}
+\end{itemize}
+{% else %}
+\begin{itemize}[leftmargin=0.15in, itemsep=2pt]
+    \item {{ skills|join(', ') }}
+\end{itemize}
+{% endif %}
+
+% Professional Experience
+\section{Professional Experience}
+
+{% for job in experience %}
+\resumeSubheading
+{ {{- job.company -}} }{ {{- job.duration -}} }
+{ {{- job.role -}} }{ {{- job.location|default('') -}} }
+
+\vspace{3pt}
+\begin{itemize}[leftmargin=0.15in, itemsep=2pt]
+{% for bullet in job.bullets %}
+    \item {{ bullet }}
+{% endfor %}
+\end{itemize}
+
+{% if not loop.last %}\vspace{8pt}{% endif %}
+
+{% endfor %}
+
+% Projects
+{% if projects %}
+\section{Notable Projects}
+{% for project in projects %}
+\textbf{\color{accent} {{- project.name -}} }
+{% if project.link %} -- \href{ {{- project.link -}} }{View Project}{% endif %}
+\\
+{{ project.description }} \\
+\textit{Tech Stack: {{ project.technologies|join(', ') }}}
+{% if not loop.last %}\vspace{5pt}{% endif %}
+{% endfor %}
+{% endif %}
+
+% Education
+\section{Education}
+{% for edu in education %}
+\textbf{\color{accent} {{- edu.degree -}} } \hfill \textit{ {{- edu.year -}} } \\
+{{ edu.institution }}
+{% if edu.gpa %} -- GPA: {{ edu.gpa }}{% endif %}
+{% if edu.honors %}
+\begin{itemize}[leftmargin=0.15in, itemsep=1pt]
+{% for honor in edu.honors %}
+    \item {{ honor }}
+{% endfor %}
+\end{itemize}
+{% endif %}
+{% if not loop.last %}\vspace{5pt}{% endif %}
+{% endfor %}
+
+% Certifications
+{% if certifications %}
+\section{Certifications \& Awards}
+\begin{itemize}[leftmargin=0.15in, itemsep=2pt]
+{% for cert in certifications %}
+    \item {{ cert }}
+{% endfor %}
+\end{itemize}
+{% endif %}
+
+\end{document}

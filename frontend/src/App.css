@@ -1,0 +1,9 @@
+@import './components/OverleafEditor.css';
+@import './components/FormatToggle.css';
+
+.app {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}

@@ -1,0 +1,238 @@
+/* Overleaf-Style Editor */
+.overleaf-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #f5f5f5;
+}
+
+/* Toolbar */
+.overleaf-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-left h1 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.toolbar-center {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.template-select {
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: none;
+    background: white;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.auto-reload-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.auto-reload-toggle input {
+    cursor: pointer;
+}
+
+.toolbar-right {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-compile,
+.btn-download {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-compile {
+    background: #4CAF50;
+    color: white;
+}
+
+.btn-compile:hover:not(:disabled) {
+    background: #45a049;
+    transform: translateY(-2px);
+}
+
+.btn-compile:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-download {
+    background: white;
+    color: #667eea;
+}
+
+.btn-download:hover:not(:disabled) {
+    background: #f0f0f0;
+    transform: translateY(-2px);
+}
+
+.btn-download:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Split View */
+.overleaf-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex: 1;
+    overflow: hidden;
+}
+
+.editor-pane,
+.preview-pane {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-right: 1px solid #ddd;
+    overflow: hidden;
+    /* Prevent parent overflow */
+}
+
+.preview-pane {
+    border-right: none;
+}
+
+.pane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: #f8f9fa;
+    border-bottom: 2px solid #e0e0e0;
+    font-weight: 600;
+    color: #333;
+    flex-shrink: 0;
+    /* Don't shrink header */
+}
+
+.compiling-indicator {
+    color: #667eea;
+    font-size: 0.9rem;
+}
+
+.btn-format {
+    padding: 6px 12px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.btn-format:hover {
+    background: #5568d3;
+}
+
+/* JSON Editor */
+.json-editor {
+    flex: 1;
+    padding: 20px 20px 20px 60px;
+    /* Left padding for line numbers effect */
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.8;
+    border: none;
+    resize: none;
+    outline: none;
+    background: #1e1e1e;
+    /* Dark theme like VS Code */
+    color: #d4d4d4;
+    tab-size: 2;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    overflow-y: auto;
+    /* Enable vertical scroll */
+}
+
+.json-editor:focus {
+    background: #1e1e1e;
+}
+
+/* Simulated line numbers */
+.editor-pane {
+    position: relative;
+}
+
+.editor-pane::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 52px;
+    /* Below header */
+    bottom: 0;
+    width: 50px;
+    background: #252526;
+    border-right: 1px solid #3e3e42;
+    pointer-events: none;
+}
+
+/* PDF Preview Container */
+.pdf-preview-container {
+    flex: 1;
+    overflow-y: auto;
+    background: #e8e8e8;
+    padding: 20px;
+}
+
+.pdf-preview-container .pdf-preview {
+    background: transparent;
+    box-shadow: none;
+}
+
+.pdf-preview-container .pdf-controls {
+    background: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pdf-preview-container .download-btn {
+    display: none;
+    /* Hide duplicate download button */
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .overleaf-split {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+
+    .editor-pane {
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+    }
+}
