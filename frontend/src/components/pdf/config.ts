@@ -10,24 +10,24 @@ export const pdfConfig = {
     page: {
         size: 'A4' as const, // 'A4' | 'LETTER'
         margin: {
-            top: 30,      // Top margin
-            right: 30,    // Right margin
-            bottom: 30,   // Bottom margin
-            left: 30,     // Left margin
+            top: 54,      // Top margin (0.75 inches - ATS standard)
+            right: 54,    // Right margin (0.75 inches - ATS standard)
+            bottom: 54,   // Bottom margin (0.75 inches - ATS standard)
+            left: 54,     // Left margin (0.75 inches - ATS standard)
         },
     },
 
     // ==================== FONTS ====================
     fonts: {
-        main: 'Helvetica',           // Main font family
-        headerName: 'Helvetica-Bold', // Name font
+        main: 'Arial',           // Main font family (ATS-preferred)
+        headerName: 'Arial',     // Name font (ATS-preferred)
     },
 
     // ==================== FONT SIZES ====================
     fontSize: {
         name: 17,              // Your name size
         contactInfo: 11,       // Email, phone, etc.
-        sectionTitle: 12,      // Section headings (PROFESSIONAL SUMMARY, etc.)
+        sectionTitle: 14,      // Section headings (PROFESSIONAL SUMMARY, etc.) - ATS standard
         normal: 11,            // Regular text
         small: 9,              // Small text
         jobEntry: 10,          // Job company/title size

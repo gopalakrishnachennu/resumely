@@ -1,12 +1,12 @@
 import React from 'react';
-import { Document, Page, Text, View, Link } from '@react-pdf/renderer';
+import { Document, Page, Text, View, Link, StyleSheet } from '@react-pdf/renderer';
 import { ResumeData } from '../../types/resume';
-import { StyleSheet } from '@react-pdf/renderer';
 import { pdfConfig as defaultConfig } from './config';
+import './fonts';  // Register custom fonts
 
 interface ResumePDFProps {
     data: ResumeData;
-    config?: any; // PDF configuration
+    config?: typeof defaultConfig;
 }
 
 /**
@@ -147,6 +147,17 @@ export const ResumePDF: React.FC<ResumePDFProps> = ({ data, config: userConfig }
             lineHeight: config.spacing.contactLineHeight || 1.5,  // Use config value
             fontFamily: config.fonts.main,  // Apply font to contact
         },
+        contactLink: {
+            fontSize: config.fontSize.contactInfo,
+            color: '#000000',  // Black color for links (ATS-friendly)
+            textDecoration: 'none',  // No underline for cleaner look
+            fontFamily: config.fonts.main,
+        },
+        contactSeparator: {
+            fontSize: config.fontSize.contactInfo,
+            color: '#000000',
+            fontFamily: config.fonts.main,
+        },
         section: {
             marginBottom: config.spacing.sectionBottom,
             wrap: false, // Try to keep section on same page
@@ -188,17 +199,63 @@ export const ResumePDF: React.FC<ResumePDFProps> = ({ data, config: userConfig }
                     <Text style={{ ...styles.name, textAlign: 'center' }}>
                         {personal_info.name}
                     </Text>
-                    <Text style={{ ...styles.contactInfo, textAlign: 'center' }}>
-                        {[
-                            personal_info.email,
-                            personal_info.phone,
-                            personal_info.linkedin,
-                            personal_info.github,
-                            personal_info.location,
-                        ]
-                            .filter(Boolean)
-                            .join(' | ')}
-                    </Text>
+
+                    {/* Contact Info with Clickable Links */}
+                    <View style={{ ...styles.contactInfo, flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        {personal_info.email && (
+                            <>
+                                <Link src={`mailto:${personal_info.email}`} style={styles.contactLink}>
+                                    {personal_info.email}
+                                </Link>
+                                {(personal_info.phone || personal_info.linkedin || personal_info.github || personal_info.location) && (
+                                    <Text style={styles.contactSeparator}> | </Text>
+                                )}
+                            </>
+                        )}
+
+                        {personal_info.phone && (
+                            <>
+                                <Link src={`tel:${personal_info.phone.replace(/[^0-9+]/g, '')}`} style={styles.contactLink}>
+                                    {personal_info.phone}
+                                </Link>
+                                {(personal_info.linkedin || personal_info.github || personal_info.location) && (
+                                    <Text style={styles.contactSeparator}> | </Text>
+                                )}
+                            </>
+                        )}
+
+                        {personal_info.linkedin && (
+                            <>
+                                <Link
+                                    src={personal_info.linkedin.startsWith('http') ? personal_info.linkedin : `https://${personal_info.linkedin}`}
+                                    style={styles.contactLink}
+                                >
+                                    {personal_info.linkedin.replace(/^https?:\/\/(www\.)?/, '')}
+                                </Link>
+                                {(personal_info.github || personal_info.location) && (
+                                    <Text style={styles.contactSeparator}> | </Text>
+                                )}
+                            </>
+                        )}
+
+                        {personal_info.github && (
+                            <>
+                                <Link
+                                    src={personal_info.github.startsWith('http') ? personal_info.github : `https://${personal_info.github}`}
+                                    style={styles.contactLink}
+                                >
+                                    {personal_info.github.replace(/^https?:\/\/(www\.)?/, '')}
+                                </Link>
+                                {personal_info.location && (
+                                    <Text style={styles.contactSeparator}> | </Text>
+                                )}
+                            </>
+                        )}
+
+                        {personal_info.location && (
+                            <Text style={styles.contactLink}>{personal_info.location}</Text>
+                        )}
+                    </View>
                 </View>
 
                 {/* Sections - render with formatting support */}

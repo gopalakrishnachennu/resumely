@@ -24,12 +24,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ config, onConfigCh
         onConfigChange(newConfig);
     };
 
-    const updateAllMargins = (value: number) => {
-        updateConfig(['page', 'margin', 'top'], value);
-        updateConfig(['page', 'margin', 'right'], value);
-        updateConfig(['page', 'margin', 'bottom'], value);
-        updateConfig(['page', 'margin', 'left'], value);
-    };
 
     return (
         <>
@@ -117,60 +111,66 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ config, onConfigCh
                                 <label>Top</label>
                                 <input
                                     type="range"
-                                    min="0"
-                                    max="72"
+                                    min="36"
+                                    max="108"
                                     value={config.page.margin.top}
                                     onChange={(e) => updateConfig(['page', 'margin', 'top'], parseInt(e.target.value))}
                                 />
-                                <span className="value">{config.page.margin.top}pt</span>
+                                <span className="value">{config.page.margin.top}pt ({(config.page.margin.top / 72).toFixed(2)}")</span>
                             </div>
 
                             <div className="setting-item">
                                 <label>Bottom</label>
                                 <input
                                     type="range"
-                                    min="0"
-                                    max="72"
+                                    min="36"
+                                    max="108"
                                     value={config.page.margin.bottom}
                                     onChange={(e) => updateConfig(['page', 'margin', 'bottom'], parseInt(e.target.value))}
                                 />
-                                <span className="value">{config.page.margin.bottom}pt</span>
+                                <span className="value">{config.page.margin.bottom}pt ({(config.page.margin.bottom / 72).toFixed(2)}")</span>
                             </div>
 
                             <div className="setting-item">
                                 <label>Left</label>
                                 <input
                                     type="range"
-                                    min="0"
-                                    max="72"
+                                    min="36"
+                                    max="108"
                                     value={config.page.margin.left}
                                     onChange={(e) => updateConfig(['page', 'margin', 'left'], parseInt(e.target.value))}
                                 />
-                                <span className="value">{config.page.margin.left}pt</span>
+                                <span className="value">{config.page.margin.left}pt ({(config.page.margin.left / 72).toFixed(2)}")</span>
                             </div>
 
                             <div className="setting-item">
                                 <label>Right</label>
                                 <input
                                     type="range"
-                                    min="0"
-                                    max="72"
+                                    min="36"
+                                    max="108"
                                     value={config.page.margin.right}
                                     onChange={(e) => updateConfig(['page', 'margin', 'right'], parseInt(e.target.value))}
                                 />
-                                <span className="value">{config.page.margin.right}pt</span>
+                                <span className="value">{config.page.margin.right}pt ({(config.page.margin.right / 72).toFixed(2)}")</span>
                             </div>
 
                             <div className="setting-item">
                                 <label>All Margins (Quick Set)</label>
                                 <input
                                     type="range"
-                                    min="0"
-                                    max="72"
+                                    min="36"
+                                    max="108"
                                     value={config.page.margin.top}
-                                    onChange={(e) => updateAllMargins(parseInt(e.target.value))}
+                                    onChange={(e) => {
+                                        const margin = parseInt(e.target.value);
+                                        updateConfig(['page', 'margin', 'top'], margin);
+                                        updateConfig(['page', 'margin', 'right'], margin);
+                                        updateConfig(['page', 'margin', 'bottom'], margin);
+                                        updateConfig(['page', 'margin', 'left'], margin);
+                                    }}
                                 />
-                                <span className="value">{config.page.margin.top}pt</span>
+                                <span className="value">{config.page.margin.top}pt ({(config.page.margin.top / 72).toFixed(2)}")</span>
                             </div>
                         </div>
 
@@ -195,6 +195,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ config, onConfigCh
                                         onConfigChange(newConfig);
                                     }}
                                 >
+                                    <option value="Arial">Arial (ATS-Preferred)</option>
+                                    <option value="Calibri">Calibri (Modern, Clean)</option>
+                                    <option value="Aptos">Aptos (New Microsoft Default)</option>
                                     <option value="Helvetica">Helvetica (Sans-serif - Clean)</option>
                                     <option value="Helvetica-Bold">Helvetica Bold</option>
                                     <option value="Times-Roman">Times New Roman (Serif - Traditional)</option>

@@ -158,6 +158,28 @@ export const OverleafEditor: React.FC<OverleafEditorProps> = ({ initialData }) =
         URL.revokeObjectURL(url);
     };
 
+    const handleDownloadDocx = async () => {
+        try {
+            let parsedData: ResumeData;
+
+            // Parse based on current format
+            if (format === 'resume') {
+                parsedData = parseResumeDSL(editorContent);
+            } else if (format === 'yaml') {
+                parsedData = yaml.load(editorContent) as ResumeData;
+            } else {
+                parsedData = JSON.parse(editorContent);
+            }
+
+            // Generate DOCX
+            const { generateDocx } = await import('./pdf/generateDocx');
+            await generateDocx(parsedData, pdfConfig);
+        } catch (err: any) {
+            console.error('DOCX generation error:', err);
+            setError(err.message || 'Failed to generate DOCX');
+        }
+    };
+
     return (
         <div className="overleaf-container">
             {/* Top Toolbar */}
@@ -189,6 +211,13 @@ export const OverleafEditor: React.FC<OverleafEditorProps> = ({ initialData }) =
                         disabled={!pdfBlob}
                     >
                         ⬇️ Download PDF
+                    </button>
+                    <button
+                        onClick={handleDownloadDocx}
+                        className="btn-download"
+                        style={{ background: '#2196F3', color: 'white' }}
+                    >
+                        📄 Download DOCX
                     </button>
                 </div>
             </div>
