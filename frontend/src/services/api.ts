@@ -27,11 +27,8 @@ export const api = {
     // Generate PDF
     generatePDF: async (resumeData: ResumeData, template: string = 'professional'): Promise<Blob> => {
         const response = await axios.post(
-            `${API_BASE}/generate-pdf`,
-            {
-                resume_data: resumeData,
-                template: template
-            },
+            `${API_BASE}/generate-pdf?template=${template}`,
+            resumeData,  // Send directly, not nested
             {
                 responseType: 'blob'
             }
