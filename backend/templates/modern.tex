@@ -1,8 +1,9 @@
 \documentclass[a4paper,11pt]{article}
-\usepackage[left=0.75in,top=0.6in,right=0.75in,bottom=0.6in]{geometry}
+\usepackage[margin=0.75in]{geometry}
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage{hyperref}
+\usepackage[normalem]{ulem} % For strikethrough support
 \usepackage{xcolor}
 
 % Font setup
@@ -78,48 +79,11 @@
 \end{itemize}
 {% endif %}
 
-% Professional Experience
-\section{Professional Experience}
-
+% Professional Experience (or custom title)
+\section{ {{- section_titles.experience|default('Professional Experience') -}} }
 {% for job in experience %}
 \resumeSubheading
 { {{- job.company -}} }{ {{- job.duration -}} }
-{ {{- job.role -}} }{ {{- job.location|default('') -}} }
-
-\vspace{3pt}
-\begin{itemize}[leftmargin=0.15in, itemsep=2pt]
-{% for bullet in job.bullets %}
-    \item {{ bullet }}
-{% endfor %}
-\end{itemize}
-
-{% if not loop.last %}\vspace{8pt}{% endif %}
-
-{% endfor %}
-
-% Projects
-{% if projects %}
-\section{Notable Projects}
-{% for project in projects %}
-\textbf{\color{accent} {{- project.name -}} }
-{% if project.link %} -- \href{ {{- project.link -}} }{View Project}{% endif %}
-\\
-{{ project.description }} \\
-\textit{Tech Stack: {{ project.technologies|join(', ') }}}
-{% if not loop.last %}\vspace{5pt}{% endif %}
-{% endfor %}
-{% endif %}
-
-% Education
-\section{Education}
-{% for edu in education %}
-\textbf{\color{accent} {{- edu.degree -}} } \hfill \textit{ {{- edu.year -}} } \\
-{{ edu.institution }}
-{% if edu.gpa %} -- GPA: {{ edu.gpa }}{% endif %}
-{% if edu.honors %}
-\begin{itemize}[leftmargin=0.15in, itemsep=1pt]
-{% for honor in edu.honors %}
-    \item {{ honor }}
 {% endfor %}
 \end{itemize}
 {% endif %}

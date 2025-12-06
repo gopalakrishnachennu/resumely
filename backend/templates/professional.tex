@@ -3,6 +3,7 @@
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage{hyperref}
+\usepackage[normalem]{ulem} % For strikethrough support
 \usepackage{xcolor}
 
 % Font setup - Sans-serif for modern look
@@ -60,8 +61,8 @@
 {{ skills|join(', ') }}
 {% endif %}
 
-% Professional Experience
-\section{Professional Experience}
+% Professional Experience (or custom title)
+\section{ {{- section_titles.experience|default('Professional Experience') -}} }
 
 {% for job in experience %}
 \resumeSubheading
@@ -98,11 +99,12 @@
 {% if projects %}
 \section{Projects}
 {% for project in projects %}
-\textbf{ {{- project.name -}} }
-{% if project.link %} \textbar{} \href{ {{- project.link -}} }{ {{- project.link -}} }{% endif %}
-\\
-{{ project.description }} \\
-\textit{Technologies: {{ project.technologies|join(', ') }}}
+\textbf{ {{- project.name -}} } {% if project.link %}\href{ {{- project.link -}} }{[Link]}{% endif %}
+
+{{ project.description }}
+
+\textit{Technologies:} {{ project.technologies|join(', ') }}
+
 {% if not loop.last %}\vspace{4pt}{% endif %}
 {% endfor %}
 {% endif %}
@@ -115,6 +117,19 @@
     \item {{ cert }}
 {% endfor %}
 \end{itemize}
+{% endif %}
+
+% Custom Sections (if any)
+{% if custom_sections %}
+{% for section_name, items in custom_sections.items() %}
+\section{ {{- section_name -}} }
+\begin{itemize}[leftmargin=0.15in, itemsep=2pt]
+{% for item in items %}
+    \item {{ item }}
+{% endfor %}
+\end{itemize}
+{% if not loop.last %}\vspace{4pt}{% endif %}
+{% endfor %}
 {% endif %}
 
 \end{document}

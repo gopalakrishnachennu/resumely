@@ -38,15 +38,15 @@ class ProjectItem(BaseModel):
     link: Optional[str] = Field(None, description="GitHub/demo link")
 
 
+class Section(BaseModel):
+    """Freeform section with title and content"""
+    title: str = Field(..., description="Section title")
+    content: List[str] = Field(..., description="Section content lines")
+
 class ResumeData(BaseModel):
-    """Complete resume data structure - AI must output this exact schema"""
+    """Freeform resume data structure"""
     personal_info: PersonalInfo
-    summary: Optional[str] = Field(None, description="Professional summary (2-3 sentences)")
-    experience: List[ExperienceItem] = Field(default_factory=list, description="Work experience entries")
-    education: List[EducationItem] = Field(default_factory=list, description="Education entries")
-    skills: dict[str, List[str]] | List[str] = Field(..., description="Skills - either categorized dict or simple list")
-    projects: Optional[List[ProjectItem]] = Field(None, description="Notable projects")
-    certifications: Optional[List[str]] = Field(None, description="Certifications")
+    sections: List[Section] = Field(default_factory=list, description="Freeform sections")
 
 
 class LinkedInParseRequest(BaseModel):
