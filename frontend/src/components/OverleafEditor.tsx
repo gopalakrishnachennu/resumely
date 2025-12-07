@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { ResumeData } from '../types/resume';
-import { api } from '../services/api';
 import { PDFPreview } from './PDFPreview';
 import * as yaml from 'js-yaml';
+import { parseResumeDSL, resumeToDSL } from '../utils/resumeDSL';
+import { SettingsPanel } from './SettingsPanel';
+import { pdfConfig as initialPdfConfig } from './pdf/config';
 import './OverleafEditor.css';
 
 interface OverleafEditorProps {
     initialData?: ResumeData;
 }
 
-type EditorFormat = 'json' | 'yaml';
+type Format = 'json' | 'yaml' | 'resume';
 
 export const OverleafEditor: React.FC<OverleafEditorProps> = ({ initialData }) => {
-    const [editorContent, setEditorContent] = useState<string>('');
-    const [format, setFormat] = useState<EditorFormat>('yaml'); // Default to YAML (easier)
+    const [format, setFormat] = useState<Format>('resume');
+    const [editorContent, setEditorContent] = useState('');
     const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
-    const [template, setTemplate] = useState('professional');
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [autoReload, setAutoReload] = useState(true);
+    const [pdfConfig, setPdfConfig] = useState(initialPdfConfig);
+    const [numPages, setNumPages] = useState<number>(0);
 
     // Initialize with sample data
     useEffect(() => {
@@ -31,27 +34,28 @@ export const OverleafEditor: React.FC<OverleafEditorProps> = ({ initialData }) =
                 github: "github.com/yourusername",
                 location: "City, State"
             },
-            summary: "Experienced professional with expertise in...",
-            experience: [],
-            education: [],
-            skills: {
-                "Cloud Platforms": ["AWS (S3, Lambda, EC2)", "Azure", "GCP"],
-                "Programming Languages & Tools": ["Python", "SQL", "JavaScript"],
-                "Databases": ["PostgreSQL", "Snowflake", "MySQL"]
-            },
-            projects: [],
-            certifications: []
+            sections: [
+                {
+                    title: "Professional Summary",
+                    content: [
+                        "Experienced professional with expertise in cloud platforms, databases, and automation."
+                    ]
+                },
+                {
+                    title: "Technical Skills",
+                    content: [
+                        "• Cloud Platforms: AWS, Azure, GCP",
+                        "• Programming: Python, SQL, JavaScript",
+                        "• Databases: PostgreSQL, MySQL, Redis"
+                    ]
+                }
+            ]
         };
 
-        // Set initial content based on format
-        if (format === 'yaml') {
-            setEditorContent(yaml.dump(sampleData, { indent: 2, lineWidth: -1 }));
-        } else {
-            setEditorContent(JSON.stringify(sampleData, null, 2));
-        }
-    }, [initialData]); // Only run on mount
+        setEditorContent(resumeToDSL(sampleData));
+    }, [initialData]);
 
-    // Auto-generate PDF when content changes
+    // Auto-reload on content change
     useEffect(() => {
         if (!autoReload || !editorContent) return;
 
@@ -60,45 +64,84 @@ export const OverleafEditor: React.FC<OverleafEditorProps> = ({ initialData }) =
         }, 1500);
 
         return () => clearTimeout(timer);
-    }, [editorContent, template, autoReload]);
+    }, [editorContent, autoReload]);
+
+    // Auto-reload when pdfConfig changes (for settings updates like font)
+    useEffect(() => {
+        if (!autoReload || !editorContent) return;
+
+        const timer = setTimeout(() => {
+            handleGeneratePDF();
+        }, 150); // Short delay for config changes
+
+        return () => clearTimeout(timer);
+    }, [pdfConfig]); // Watch pdfConfig changes
+
 
     // Handle format toggle
-    const handleFormatToggle = (newFormat: EditorFormat) => {
+    const handleFormatToggle = (newFormat: Format) => {
         try {
             // Parse current content
-            const data = format === 'yaml'
-                ? yaml.load(editorContent) as ResumeData
-                : JSON.parse(editorContent);
+            let data: ResumeData;
+            if (format === 'resume') {
+                data = parseResumeDSL(editorContent);
+            } else if (format === 'yaml') {
+                data = yaml.load(editorContent) as ResumeData;
+            } else {
+                data = JSON.parse(editorContent);
+            }
 
             // Convert to new format
-            if (newFormat === 'yaml') {
-                setEditorContent(yaml.dump(data, { indent: 2, lineWidth: -1 }));
+            let newContent: string;
+            if (newFormat === 'resume') {
+                newContent = resumeToDSL(data);
+            } else if (newFormat === 'yaml') {
+                newContent = yaml.dump(data);
             } else {
-                setEditorContent(JSON.stringify(data, null, 2));
+                newContent = JSON.stringify(data, null, 2);
             }
+
             setFormat(newFormat);
+            setEditorContent(newContent);
         } catch (err) {
-            setError('Cannot convert: Invalid format in current editor');
+            setError(`Failed to convert format: ${err}`);
         }
     };
 
     const handleGeneratePDF = async () => {
-        try {
-            setError(null);
-            // Parse based on current format
-            const data = format === 'yaml'
-                ? yaml.load(editorContent) as ResumeData
-                : JSON.parse(editorContent);
+        setError(null);
+        setIsGenerating(true);
 
-            setIsGenerating(true);
-            const blob = await api.generatePDF(data, template);
-            setPdfBlob(blob);
-        } catch (err: any) {
-            if (err instanceof yaml.YAMLException || err instanceof SyntaxError) {
-                setError(`Invalid ${format.toUpperCase()} syntax`);
+        try {
+            let parsedData: ResumeData;
+
+            // Parse based on current format
+            if (format === 'resume') {
+                parsedData = parseResumeDSL(editorContent);
+            } else if (format === 'yaml') {
+                parsedData = yaml.load(editorContent) as ResumeData;
             } else {
-                setError(err.response?.data?.detail || 'Failed to generate PDF');
+                parsedData = JSON.parse(editorContent);
             }
+
+            // Generate PDF using React-PDF (client-side) with current config
+            const { pdf } = await import('@react-pdf/renderer');
+            const { ResumePDF } = await import('./pdf/ResumePDF');
+
+            // Add key to force re-render when font changes
+            const blob = await pdf(
+                <ResumePDF
+                    data={parsedData}
+                    config={pdfConfig}
+                    key={`${pdfConfig.fonts.main}-${Date.now()}`}
+                />
+            ).toBlob();
+            setPdfBlob(blob);
+
+            console.log('PDF generated successfully:', blob.size, 'bytes');
+        } catch (err: any) {
+            console.error('PDF generation error:', err);
+            setError(err.message || 'Failed to generate PDF');
         } finally {
             setIsGenerating(false);
         }
@@ -106,10 +149,11 @@ export const OverleafEditor: React.FC<OverleafEditorProps> = ({ initialData }) =
 
     const handleDownload = () => {
         if (!pdfBlob) return;
+
         const url = URL.createObjectURL(pdfBlob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `resume_${template}.pdf`;
+        a.download = `resume.pdf`;
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -122,14 +166,6 @@ export const OverleafEditor: React.FC<OverleafEditorProps> = ({ initialData }) =
                     <h1>📝 Resume Editor</h1>
                 </div>
                 <div className="toolbar-center">
-                    <select
-                        value={template}
-                        onChange={(e) => setTemplate(e.target.value)}
-                        className="template-select"
-                    >
-                        <option value="professional">Professional</option>
-                        <option value="modern">Modern</option>
-                    </select>
                     <label className="auto-reload-toggle">
                         <input
                             type="checkbox"
@@ -170,8 +206,14 @@ export const OverleafEditor: React.FC<OverleafEditorProps> = ({ initialData }) =
                 {/* Left: Editor */}
                 <div className="editor-pane">
                     <div className="pane-header">
-                        <span>📄 Resume Data ({format.toUpperCase()})</span>
+                        <span>📄 Resume Data ({format === 'resume' ? 'CUSTOM' : format.toUpperCase()})</span>
                         <div className="format-toggle">
+                            <button
+                                className={`format-btn ${format === 'resume' ? 'active' : ''}`}
+                                onClick={() => handleFormatToggle('resume')}
+                            >
+                                Resume
+                            </button>
                             <button
                                 className={`format-btn ${format === 'yaml' ? 'active' : ''}`}
                                 onClick={() => handleFormatToggle('yaml')}
@@ -202,10 +244,25 @@ export const OverleafEditor: React.FC<OverleafEditorProps> = ({ initialData }) =
                         {isGenerating && <span className="compiling-indicator">⏳ Compiling...</span>}
                     </div>
                     <div className="pdf-preview-container">
+                        {/* Page Counter Badge */}
+                        {pdfBlob && (
+                            <div className="page-counter-badge">
+                                2 pages
+                            </div>
+                        )}
                         <PDFPreview pdfBlob={pdfBlob} />
                     </div>
                 </div>
             </div>
+
+            {/* Settings Panel */}
+            <SettingsPanel
+                config={pdfConfig}
+                onConfigChange={(newConfig) => {
+                    setPdfConfig(newConfig);
+                    // PDF will regenerate automatically via useEffect
+                }}
+            />
         </div>
     );
 };

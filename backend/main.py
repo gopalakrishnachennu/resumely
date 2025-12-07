@@ -151,46 +151,36 @@ async def match_job(request: JobMatchRequest):
 
 
 @app.post("/api/generate-pdf")
-async def generate_pdf(request: GeneratePDFRequest):
+async def generate_pdf(resume_data: ResumeData, template: str = "professional"):
     """
-    Generate PDF from resume data using specified template
-    WORKS IN BOTH MODES - No AI call, just PDF compilation
+    Generate PDF from resume data using freeform template
     
-    Returns: PDF file as binary response
+    Args:
+        resume_data: Resume data in freeform structure
+        template: Template name (ignored, always uses freeform)
+    
+    Returns:
+        PDF file as binary stream
     """
     try:
-        # Validate template
-        if not template_service.validate_template(request.template):
-            available = template_service.get_available_templates()
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid template '{request.template}'. Available: {', '.join(available)}"
-            )
-        
-        # Render LaTeX from template
-        latex_content = template_service.render_resume(
-            request.resume_data,
-            request.template
+        # Render LaTeX
+        latex_content, render_context = template_service.render_resume(
+            resume_data, template, return_context=True
         )
         
-        # Compile to PDF
-        pdf_bytes = pdf_service.compile_latex(latex_content)
+        # Generate PDF (uses Tectonic when available, falls back to FPDF offline)
+        pdf_bytes = pdf_service.compile_resume(latex_content, render_context)
         
-        # Return PDF as binary response
+        # Return as streaming response
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
             headers={
-                "Content-Disposition": f"attachment; filename=resume_{request.template}.pdf"
+                "Content-Disposition": "attachment; filename=resume.pdf"
             }
         )
-        
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/api/preview-latex")

@@ -126,3 +126,34 @@ Tectonic has complex Rust dependencies that cause Docker build issues. Running l
 - ✅ **Easier to debug** - Direct access to logs
 
 You can always add Docker later once everything works!
+
+
+Resume DSL Example:
+
+@NAME Your Name
+@EMAIL your.email@example.com
+@PHONE +1 (123) 456-7890
+@LINKEDIN linkedin.com/in/yourprofile
+@GITHUB github.com/yourusername
+@LOCATION City, State
+
+@Professional Summary
+Experienced professional with expertise in cloud platforms, databases, and automation.
+
+@Technical Skills
+- **Cloud Platforms:** AWS, Azure, GCP
+- **Programming:** Python, SQL, JavaScript
+- **Databases:** PostgreSQL, MySQL, Redis
+
+@Professional Experience
+
+@JOB Transamerica | Database Reliability Engineer | July 2023 - Present | San Jose, CA
+- Built and maintained PostgreSQL databases with **99.99% uptime**
+- Reduced infrastructure costs by **70%**
+- Published @LINK[database scaling article](https://medium.com/@user/db-scaling) with **10K+ views**
+
+@Education
+
+@JOB Wilmington University | Bachelor of Science in Computer Science | 2019 - 2023 | Wilmington, DE
+- GPA: **3.8/4.0**
+- Dean's List all semesters
